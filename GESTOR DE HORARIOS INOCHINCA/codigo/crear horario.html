@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Crear Horario - Gestor de Horarios</title>
+
+    <link
+        rel="stylesheet"
+        href="crear horario.css"
+    >
+
+</head>
+
+
+<body>
+
+
+    <!-- =====================================================
+         CONTENEDOR PRINCIPAL
+         ===================================================== -->
+
+    <main class="pagina">
+
+
+        <!-- =================================================
+             ENCABEZADO
+             ================================================= -->
+
+        <header class="encabezado">
+
+            <h1>CREAR HORARIO</h1>
+
+            <p>
+                Gestor de Horarios
+            </p>
+
+        </header>
+
+
+        <!-- =================================================
+             CONTENIDO
+             ================================================= -->
+
+        <section class="contenedor">
+
+
+            <!-- =================================================
+                 INFORMACIÓN DEL HORARIO
+                 ================================================= -->
+
+            <div class="tarjeta">
+
+                <h2>Información del horario</h2>
+
+
+                <div class="campo">
+
+                    <label for="nombreHorario">
+                        Nombre del horario
+                    </label>
+
+                    <input
+                        type="text"
+                        id="nombreHorario"
+                        placeholder="Ejemplo: Grado 10°A"
+                    >
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 CONFIGURACIÓN DE LAS CLASES
+                 ================================================= -->
+
+            <div class="tarjeta">
+
+                <h2>Configuración de clases</h2>
+
+                <p class="descripcion">
+                    Ingresa la información de cada clase.
+                    Puedes dejar campos vacíos si no deseas
+                    utilizarlos.
+                </p>
+
+
+                <div class="tabla-scroll">
+
+                    <table class="tabla-entrada">
+
+                        <thead>
+
+                            <tr>
+
+                                <th>Día</th>
+
+                                <th>Clase</th>
+
+                                <th>Hora inicio</th>
+
+                                <th>Hora final</th>
+
+                                <th>Asignatura</th>
+
+                                <th>Docente</th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody id="formularioClases">
+
+                            <!-- JavaScript genera las filas -->
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 BOTONES
+                 ================================================= -->
+
+            <div class="acciones">
+
+                <button
+                    type="button"
+                    id="btnGenerar"
+                    class="boton boton-generar"
+                >
+                    📅 Generar horario
+                </button>
+
+
+                <button
+                    type="button"
+                    id="btnGuardar"
+                    class="boton boton-guardar"
+                >
+                    💾 Guardar horario
+                </button>
+
+
+                <button
+                    type="button"
+                    id="btnPDF"
+                    class="boton boton-pdf"
+                >
+                    📄 Descargar PDF
+                </button>
+
+
+                <button
+                    type="button"
+                    id="btnLimpiar"
+                    class="boton boton-limpiar"
+                >
+                    🗑️ Limpiar
+                </button>
+
+            </div>
+
+
+            <!-- =================================================
+                 MENSAJE
+                 ================================================= -->
+
+            <div
+                id="mensaje"
+                class="mensaje"
+            ></div>
+
+
+            <!-- =================================================
+                 VISTA PREVIA
+                 ================================================= -->
+
+            <div
+                id="vistaPrevia"
+                class="tarjeta vista-previa"
+            >
+
+                <div class="titulo-preview">
+
+                    <h2 id="tituloPreview">
+                        HORARIO
+                    </h2>
+
+                    <p id="nombrePreview">
+                        Sin nombre
+                    </p>
+
+                </div>
+
+
+                <div class="tabla-scroll">
+
+                    <table
+                        id="tablaHorario"
+                        class="tabla-horario"
+                    >
+
+                        <thead>
+
+                            <tr>
+
+                                <th>Horas</th>
+
+                                <th>Día 1</th>
+
+                                <th>Día 2</th>
+
+                                <th>Día 3</th>
+
+                                <th>Día 4</th>
+
+                                <th>Día 5</th>
+
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody id="cuerpoHorario">
+
+                            <!-- JavaScript genera el horario -->
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+
+        </section>
+
+
+    </main>
+
+
+    <!-- =====================================================
+         LIBRERÍAS PARA PDF
+         ===================================================== -->
+
+    <script
+        src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"
+    ></script>
+
+
+    <script
+        src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"
+    ></script>
+
+
+    <!-- =====================================================
+         JAVASCRIPT PROPIO
+         ===================================================== -->
+
+    <script src="crear horario.js"></script>
+
+
+</body>
+
+</html>

@@ -1,0 +1,1404 @@
+/* =========================================================
+   GESTOR DE HORARIOS
+   VER HORARIOS
+   ========================================================= */
+
+
+/* =========================================================
+   CONFIGURACIÓN GENERAL
+   ========================================================= */
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+
+html {
+    width: 100%;
+    min-height: 100%;
+}
+
+
+body {
+
+    width: 100%;
+    min-height: 100vh;
+
+    font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+
+    background:
+        #fffaf8;
+
+    color:
+        #7f2b1d;
+
+}
+
+
+/* =========================================================
+   PÁGINA
+   ========================================================= */
+
+.pagina {
+
+    width: 100%;
+    min-height: 100vh;
+
+    display: flex;
+    flex-direction: column;
+
+}
+
+
+/* =========================================================
+   ENCABEZADO
+   ========================================================= */
+
+.encabezado {
+
+    position: relative;
+
+    width: 100%;
+
+    min-height: 125px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    background:
+        linear-gradient(
+            180deg,
+            #e45b43 0%,
+            #d94c35 100%
+        );
+
+    border-bottom:
+        9px solid #9e2917;
+
+    border-radius:
+        0 0 50% 50% / 0 0 35% 35%;
+
+    padding:
+        20px 30px;
+
+}
+
+
+/* =========================================================
+   ICONO DEL ENCABEZADO
+   ========================================================= */
+
+.icono-encabezado {
+
+    position: absolute;
+
+    left: 25px;
+
+    top: 20px;
+
+    width: 72px;
+
+    height: 72px;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    background:
+        #ffffff;
+
+    border:
+        4px solid #d94c35;
+
+    border-radius: 50%;
+
+    box-shadow:
+        0 3px 10px
+        rgba(100, 30, 20, 0.18);
+
+}
+
+
+.icono-encabezado span {
+
+    font-size: 34px;
+
+}
+
+
+/* =========================================================
+   TÍTULO
+   ========================================================= */
+
+.titulo-encabezado {
+
+    text-align: center;
+
+}
+
+
+.titulo-encabezado h1 {
+
+    color:
+        #ffffff;
+
+    font-size:
+        clamp(35px, 5vw, 58px);
+
+    font-weight:
+        900;
+
+    letter-spacing:
+        -1px;
+
+}
+
+
+.titulo-encabezado p {
+
+    margin-top:
+        4px;
+
+    color:
+        #ffffff;
+
+    font-size:
+        clamp(17px, 2vw, 24px);
+
+    font-weight:
+        600;
+
+}
+
+
+/* =========================================================
+   CONTENIDO PRINCIPAL
+   ========================================================= */
+
+.contenido-principal {
+
+    width:
+        min(1480px, 96%);
+
+    margin:
+        25px auto;
+
+    display:
+        grid;
+
+    grid-template-columns:
+        0.9fr 1.5fr;
+
+    gap:
+        15px;
+
+    flex:
+        1;
+
+}
+
+
+/* =========================================================
+   PANELES
+   ========================================================= */
+
+.panel-lista,
+.panel-vista {
+
+    background:
+        #ffffff;
+
+    border:
+        1px solid #efc7bd;
+
+    border-radius:
+        15px;
+
+    padding:
+        25px;
+
+    box-shadow:
+        0 4px 18px
+        rgba(127, 43, 29, 0.07);
+
+}
+
+
+/* =========================================================
+   TÍTULOS DE LOS PANELES
+   ========================================================= */
+
+.titulo-panel {
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    gap:
+        12px;
+
+    margin-bottom:
+        20px;
+
+}
+
+
+.titulo-panel h2 {
+
+    color:
+        #7f2b1d;
+
+    font-size:
+        24px;
+
+    font-weight:
+        800;
+
+}
+
+
+.icono-titulo {
+
+    font-size:
+        29px;
+
+}
+
+
+/* =========================================================
+   BUSCADOR
+   ========================================================= */
+
+.buscador {
+
+    width:
+        100%;
+
+    height:
+        50px;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    gap:
+        10px;
+
+    border:
+        1px solid #e8b8ac;
+
+    border-radius:
+        9px;
+
+    padding:
+        0 13px;
+
+    margin-bottom:
+        18px;
+
+    background:
+        #ffffff;
+
+}
+
+
+.icono-busqueda {
+
+    font-size:
+        22px;
+
+}
+
+
+.buscador input {
+
+    width:
+        100%;
+
+    height:
+        100%;
+
+    border:
+        none;
+
+    outline:
+        none;
+
+    font-size:
+        16px;
+
+    color:
+        #63271c;
+
+}
+
+
+.buscador input::placeholder {
+
+    color:
+        #a59691;
+
+}
+
+
+/* =========================================================
+   LISTA DE HORARIOS
+   ========================================================= */
+
+.lista-horarios {
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    gap:
+        10px;
+
+    max-height:
+        650px;
+
+    overflow-y:
+        auto;
+
+    padding-right:
+        4px;
+
+}
+
+
+/* =========================================================
+   TARJETA DE HORARIO
+   ========================================================= */
+
+.item-horario {
+
+    width:
+        100%;
+
+    min-height:
+        92px;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    gap:
+        12px;
+
+    padding:
+        12px;
+
+    border:
+        1px solid #edc4b9;
+
+    border-radius:
+        11px;
+
+    background:
+        #ffffff;
+
+    transition:
+        transform 0.18s ease,
+        border 0.18s ease,
+        background 0.18s ease;
+
+}
+
+
+.item-horario:hover {
+
+    transform:
+        translateY(-1px);
+
+    border-color:
+        #d94c35;
+
+}
+
+
+.item-horario.seleccionado {
+
+    background:
+        #fff0eb;
+
+    border:
+        2px solid #e34d36;
+
+}
+
+
+/* =========================================================
+   ICONO DEL HORARIO
+   ========================================================= */
+
+.icono-horario {
+
+    flex-shrink:
+        0;
+
+    width:
+        60px;
+
+    height:
+        60px;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    border-radius:
+        10px;
+
+    background:
+        linear-gradient(
+            180deg,
+            #df4e37,
+            #c93724
+        );
+
+    color:
+        #ffffff;
+
+    font-size:
+        29px;
+
+}
+
+
+/* =========================================================
+   INFORMACIÓN DEL HORARIO
+   ========================================================= */
+
+.info-horario {
+
+    flex:
+        1;
+
+    min-width:
+        0;
+
+}
+
+
+.info-horario h3 {
+
+    color:
+        #231612;
+
+    font-size:
+        18px;
+
+    font-weight:
+        800;
+
+    margin-bottom:
+        7px;
+
+    overflow:
+        hidden;
+
+    text-overflow:
+        ellipsis;
+
+    white-space:
+        nowrap;
+
+}
+
+
+.info-horario p {
+
+    color:
+        #49332d;
+
+    font-size:
+        13px;
+
+}
+
+
+/* =========================================================
+   BOTONES DEL ITEM
+   ========================================================= */
+
+.botones-item {
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    gap:
+        8px;
+
+}
+
+
+.boton-item {
+
+    width:
+        51px;
+
+    height:
+        51px;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    background:
+        #ffffff;
+
+    border:
+        1px solid #edb6a9;
+
+    border-radius:
+        8px;
+
+    color:
+        #d43e27;
+
+    font-size:
+        21px;
+
+    cursor:
+        pointer;
+
+    transition:
+        background 0.18s ease,
+        transform 0.18s ease;
+
+}
+
+
+.boton-item:hover {
+
+    background:
+        #fff0eb;
+
+    transform:
+        translateY(-2px);
+
+}
+
+
+/* =========================================================
+   BOTÓN ELIMINAR
+   ========================================================= */
+
+.boton-eliminar {
+
+    color:
+        #c9291c;
+
+}
+
+
+/* =========================================================
+   TOTAL
+   ========================================================= */
+
+.total-horarios {
+
+    margin-top:
+        18px;
+
+    padding:
+        13px;
+
+    border:
+        1px solid #f0d5cd;
+
+    border-radius:
+        8px;
+
+    background:
+        #fff8f5;
+
+    color:
+        #76291c;
+
+    font-size:
+        15px;
+
+}
+
+
+/* =========================================================
+   PANEL VISTA
+   ========================================================= */
+
+.titulo-vista {
+
+    position:
+        relative;
+
+}
+
+
+.titulo-vista h2 {
+
+    flex:
+        1;
+
+}
+
+
+/* =========================================================
+   BOTÓN PDF
+   ========================================================= */
+
+.boton-pdf {
+
+    border:
+        none;
+
+    border-radius:
+        8px;
+
+    padding:
+        12px 18px;
+
+    background:
+        linear-gradient(
+            180deg,
+            #dd4b33,
+            #c93421
+        );
+
+    color:
+        #ffffff;
+
+    font-size:
+        15px;
+
+    font-weight:
+        800;
+
+    cursor:
+        pointer;
+
+    box-shadow:
+        0 3px 0 #9f2516;
+
+}
+
+
+.boton-pdf:hover {
+
+    transform:
+        translateY(-1px);
+
+}
+
+
+/* =========================================================
+   VISTA PREVIA
+   ========================================================= */
+
+.preview-horario {
+
+    width:
+        100%;
+
+}
+
+
+.informacion-preview {
+
+    padding:
+        16px;
+
+    margin-bottom:
+        14px;
+
+    border:
+        1px solid #edc4b9;
+
+    border-radius:
+        9px;
+
+    background:
+        #fffaf8;
+
+}
+
+
+.informacion-preview h3 {
+
+    color:
+        #241713;
+
+    font-size:
+        21px;
+
+    margin-bottom:
+        5px;
+
+}
+
+
+.informacion-preview p {
+
+    color:
+        #5e4037;
+
+    font-size:
+        13px;
+
+}
+
+
+/* =========================================================
+   SEPARACIÓN DE CADA DÍA
+   ========================================================= */
+
+.bloque-dia {
+
+    margin-bottom:
+        15px;
+
+    border:
+        1px solid #e4b9ad;
+
+    border-radius:
+        8px;
+
+    overflow:
+        hidden;
+
+}
+
+
+/* =========================================================
+   ENCABEZADO DEL DÍA
+   ========================================================= */
+
+.encabezado-dia {
+
+    padding:
+        9px 18px;
+
+    background:
+        linear-gradient(
+            90deg,
+            #a92b17,
+            #bd321d
+        );
+
+    color:
+        #ffffff;
+
+    font-size:
+        17px;
+
+    font-weight:
+        800;
+
+}
+
+
+/* =========================================================
+   TABLA DEL DÍA
+   ========================================================= */
+
+.tabla-dia {
+
+    width:
+        100%;
+
+    border-collapse:
+        collapse;
+
+}
+
+
+.tabla-dia th {
+
+    padding:
+        9px 7px;
+
+    background:
+        #f7e3de;
+
+    color:
+        #281814;
+
+    font-size:
+        14px;
+
+    font-weight:
+        800;
+
+    border-right:
+        1px solid #e2c3ba;
+
+    border-bottom:
+        1px solid #e2c3ba;
+
+    text-align:
+        center;
+
+}
+
+
+.tabla-dia td {
+
+    padding:
+        9px 7px;
+
+    min-height:
+        43px;
+
+    background:
+        #ffffff;
+
+    color:
+        #38251f;
+
+    font-size:
+        13px;
+
+    text-align:
+        center;
+
+    border-right:
+        1px solid #e6cec7;
+
+    border-bottom:
+        1px solid #e6cec7;
+
+    vertical-align:
+        middle;
+
+}
+
+
+.tabla-dia tr:nth-child(even) td {
+
+    background:
+        #fff8f5;
+
+}
+
+
+/* =========================================================
+   HORA
+   ========================================================= */
+
+.celda-hora {
+
+    width:
+        145px;
+
+    background:
+        #f2dfd9 !important;
+
+    color:
+        #7f2b1d !important;
+
+    font-weight:
+        800;
+
+}
+
+
+/* =========================================================
+   ASIGNATURA
+   ========================================================= */
+
+.celda-asignatura {
+
+    font-weight:
+        800;
+
+    color:
+        #7f2b1d !important;
+
+}
+
+
+/* =========================================================
+   DOCENTE
+   ========================================================= */
+
+.celda-docente {
+
+    color:
+        #77554c !important;
+
+}
+
+
+/* =========================================================
+   CELDA VACÍA
+   ========================================================= */
+
+.celda-vacia {
+
+    color:
+        #c4aaa3;
+
+    font-style:
+        italic;
+
+}
+
+
+/* =========================================================
+   ESTADO SIN SELECCIÓN
+   ========================================================= */
+
+.sin-seleccion {
+
+    min-height:
+        500px;
+
+    display:
+        flex;
+
+    flex-direction:
+        column;
+
+    align-items:
+        center;
+
+    justify-content:
+        center;
+
+    text-align:
+        center;
+
+    border:
+        1px dashed #e0b4a8;
+
+    border-radius:
+        10px;
+
+    background:
+        #fffaf8;
+
+}
+
+
+.sin-seleccion-icono {
+
+    font-size:
+        55px;
+
+    margin-bottom:
+        15px;
+
+}
+
+
+.sin-seleccion h3 {
+
+    color:
+        #7f2b1d;
+
+    font-size:
+        23px;
+
+    margin-bottom:
+        8px;
+
+}
+
+
+.sin-seleccion p {
+
+    max-width:
+        400px;
+
+    color:
+        #87675e;
+
+    line-height:
+        1.5;
+
+}
+
+
+/* =========================================================
+   SIN RESULTADOS
+   ========================================================= */
+
+.sin-resultados {
+
+    text-align:
+        center;
+
+    padding:
+        35px 10px;
+
+    color:
+        #95756d;
+
+}
+
+
+/* =========================================================
+   PIE DE PÁGINA
+   ========================================================= */
+
+.pie {
+
+    width:
+        100%;
+
+    min-height:
+        65px;
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        space-between;
+
+    gap:
+        20px;
+
+    padding:
+        10px 25px;
+
+    background:
+        #c52e18;
+
+    color:
+        #ffffff;
+
+}
+
+
+.pie p {
+
+    flex:
+        1;
+
+    text-align:
+        center;
+
+    font-size:
+        14px;
+
+}
+
+
+.boton-volver {
+
+    border:
+        none;
+
+    border-radius:
+        8px;
+
+    padding:
+        11px 20px;
+
+    background:
+        #ffffff;
+
+    color:
+        #8e291b;
+
+    font-size:
+        15px;
+
+    font-weight:
+        800;
+
+    cursor:
+        pointer;
+
+}
+
+
+.boton-volver:hover {
+
+    background:
+        #fff0eb;
+
+}
+
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 1050px) {
+
+    .contenido-principal {
+
+        grid-template-columns:
+            1fr;
+
+    }
+
+
+    .lista-horarios {
+
+        max-height:
+            500px;
+
+    }
+
+}
+
+
+@media (max-width: 700px) {
+
+    .encabezado {
+
+        min-height:
+            115px;
+
+        padding:
+            20px 80px;
+
+    }
+
+
+    .icono-encabezado {
+
+        left:
+            15px;
+
+        width:
+            60px;
+
+        height:
+            60px;
+
+    }
+
+
+    .icono-encabezado span {
+
+        font-size:
+            27px;
+
+    }
+
+
+    .contenido-principal {
+
+        width:
+            96%;
+
+        margin:
+            15px auto;
+
+    }
+
+
+    .panel-lista,
+    .panel-vista {
+
+        padding:
+            16px;
+
+    }
+
+
+    .titulo-panel h2 {
+
+        font-size:
+            20px;
+
+    }
+
+
+    .titulo-vista {
+
+        flex-wrap:
+            wrap;
+
+    }
+
+
+    .boton-pdf {
+
+        width:
+            100%;
+
+        margin-top:
+            5px;
+
+    }
+
+
+    .item-horario {
+
+        align-items:
+            flex-start;
+
+    }
+
+
+    .botones-item {
+
+        flex-direction:
+            column;
+
+    }
+
+
+    .boton-item {
+
+        width:
+            43px;
+
+        height:
+            43px;
+
+    }
+
+
+    .tabla-dia {
+
+        min-width:
+            650px;
+
+    }
+
+
+    .bloque-dia {
+
+        overflow-x:
+            auto;
+
+    }
+
+
+    .encabezado-dia {
+
+        min-width:
+            650px;
+
+    }
+
+
+    .pie {
+
+        flex-direction:
+            column;
+
+        padding:
+            15px;
+
+    }
+
+
+    .pie p {
+
+        order:
+            1;
+
+    }
+
+
+    .boton-volver {
+
+        order:
+            0;
+
+        width:
+            100%;
+
+    }
+
+}
+
+
+/* =========================================================
+   IMPRESIÓN
+   ========================================================= */
+
+@media print {
+
+    body {
+
+        background:
+            #ffffff;
+
+    }
+
+
+    .encabezado,
+    .panel-lista,
+    .titulo-vista .boton-pdf,
+    .pie {
+
+        display:
+            none !important;
+
+    }
+
+
+    .contenido-principal {
+
+        display:
+            block;
+
+        width:
+            100%;
+
+        margin:
+            0;
+
+    }
+
+
+    .panel-vista {
+
+        border:
+            none;
+
+        box-shadow:
+            none;
+
+        padding:
+            0;
+
+    }
+
+
+    .bloque-dia {
+
+        break-inside:
+            avoid;
+
+    }
+
+}

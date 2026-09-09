@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Ver Horarios - Gestor de Horarios</title>
+
+    <link
+        rel="stylesheet"
+        href="ver horarios.css"
+    >
+
+</head>
+
+
+<body>
+
+
+    <!-- =====================================================
+         PÁGINA PRINCIPAL
+         ===================================================== -->
+
+    <main class="pagina">
+
+
+        <!-- =================================================
+             ENCABEZADO
+             ================================================= -->
+
+        <header class="encabezado">
+
+
+            <div class="icono-encabezado">
+
+                <span>📅</span>
+
+            </div>
+
+
+            <div class="titulo-encabezado">
+
+                <h1>VER HORARIOS</h1>
+
+                <p>
+                    Gestor de Horarios
+                </p>
+
+            </div>
+
+
+        </header>
+
+
+        <!-- =================================================
+             CONTENIDO PRINCIPAL
+             ================================================= -->
+
+        <section class="contenido-principal">
+
+
+            <!-- =================================================
+                 PANEL IZQUIERDO
+                 ================================================= -->
+
+            <section class="panel-lista">
+
+
+                <div class="titulo-panel">
+
+                    <span class="icono-titulo">
+                        📁
+                    </span>
+
+                    <h2>
+                        Lista de horarios guardados
+                    </h2>
+
+                </div>
+
+
+                <!-- BUSCADOR -->
+
+                <div class="buscador">
+
+                    <span class="icono-busqueda">
+                        🔍
+                    </span>
+
+                    <input
+                        type="text"
+                        id="buscarHorario"
+                        placeholder="Buscar horario..."
+                    >
+
+                </div>
+
+
+                <!-- LISTA -->
+
+                <div
+                    id="listaHorarios"
+                    class="lista-horarios"
+                >
+
+                    <!-- JavaScript genera los horarios -->
+
+                </div>
+
+
+                <!-- TOTAL -->
+
+                <div
+                    id="totalHorarios"
+                    class="total-horarios"
+                >
+
+                    Total de horarios: 0
+
+                </div>
+
+
+            </section>
+
+
+            <!-- =================================================
+                 PANEL DERECHO
+                 ================================================= -->
+
+            <section class="panel-vista">
+
+
+                <!-- TÍTULO DEL PANEL -->
+
+                <div class="titulo-panel titulo-vista">
+
+                    <span class="icono-titulo">
+                        👁️
+                    </span>
+
+                    <h2>
+                        Vista previa del horario
+                    </h2>
+
+
+                    <button
+                        type="button"
+                        id="btnPDF"
+                        class="boton-pdf"
+                    >
+
+                        📄 Descargar PDF
+
+                    </button>
+
+                </div>
+
+
+                <!-- =================================================
+                     HORARIO SELECCIONADO
+                     ================================================= -->
+
+                <div
+                    id="previewHorario"
+                    class="preview-horario"
+                >
+
+
+                    <!-- ESTADO INICIAL -->
+
+                    <div class="sin-seleccion">
+
+                        <div class="sin-seleccion-icono">
+                            📅
+                        </div>
+
+                        <h3>
+                            Selecciona un horario
+                        </h3>
+
+                        <p>
+                            Selecciona uno de los horarios
+                            de la lista para visualizarlo.
+                        </p>
+
+                    </div>
+
+
+                </div>
+
+
+            </section>
+
+
+        </section>
+
+
+        <!-- =================================================
+             PIE DE PÁGINA
+             ================================================= -->
+
+        <footer class="pie">
+
+
+            <button
+                type="button"
+                id="btnVolver"
+                class="boton-volver"
+            >
+
+                ← Volver al menú
+
+            </button>
+
+
+            <p>
+                Gestor de Horarios -
+                Institución Educativa Inocencio Chincá
+            </p>
+
+
+        </footer>
+
+
+    </main>
+
+
+    <!-- =====================================================
+         LIBRERÍAS PDF
+         ===================================================== -->
+
+    <script
+        src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"
+    ></script>
+
+
+    <script
+        src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"
+    ></script>
+
+
+    <!-- =====================================================
+         JAVASCRIPT PROPIO
+         ===================================================== -->
+
+    <script src="ver horarios.js"></script>
+
+
+</body>
+
+</html>

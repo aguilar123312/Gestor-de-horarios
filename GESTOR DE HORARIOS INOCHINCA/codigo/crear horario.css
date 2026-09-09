@@ -1,0 +1,969 @@
+/* =========================================================
+   GESTOR DE HORARIOS
+   CREAR HORARIO
+   ========================================================= */
+
+
+/* =========================================================
+   CONFIGURACIÓN GENERAL
+   ========================================================= */
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+
+html {
+    width: 100%;
+    min-height: 100%;
+}
+
+
+body {
+
+    width: 100%;
+    min-height: 100vh;
+
+    font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+
+    background: #ffffff;
+
+    color: #7f2b1d;
+
+}
+
+
+/* =========================================================
+   PÁGINA
+   ========================================================= */
+
+.pagina {
+
+    width: 100%;
+    min-height: 100vh;
+
+    position: relative;
+
+    overflow-x: hidden;
+
+}
+
+
+/* =========================================================
+   ENCABEZADO
+   ========================================================= */
+
+.encabezado {
+
+    width: 100%;
+
+    background: #d86b62;
+
+    border-bottom:
+        8px solid #9e2917;
+
+    border-radius:
+        0 0 50% 50% / 0 0 35% 35%;
+
+    padding:
+        35px 20px 45px;
+
+    text-align: center;
+
+}
+
+
+.encabezado h1 {
+
+    color: #ffffff;
+
+    font-size:
+        clamp(34px, 5vw, 60px);
+
+    font-weight: 800;
+
+    letter-spacing: -1px;
+
+}
+
+
+.encabezado p {
+
+    margin-top: 8px;
+
+    color: #ffffff;
+
+    font-size:
+        clamp(17px, 2vw, 25px);
+
+    font-weight: 700;
+
+}
+
+
+/* =========================================================
+   CONTENEDOR
+   ========================================================= */
+
+.contenedor {
+
+    width: min(
+        1200px,
+        94%
+    );
+
+    margin:
+        35px auto 70px;
+
+}
+
+
+/* =========================================================
+   TARJETAS
+   ========================================================= */
+
+.tarjeta {
+
+    background: #ffffff;
+
+    border:
+        2px solid #c44429;
+
+    border-radius: 16px;
+
+    padding: 25px;
+
+    margin-bottom: 25px;
+
+    box-shadow:
+        0 5px 18px
+        rgba(127, 43, 29, 0.10);
+
+}
+
+
+.tarjeta h2 {
+
+    color: #8f2d1d;
+
+    font-size: 26px;
+
+    margin-bottom: 18px;
+
+}
+
+
+.descripcion {
+
+    color: #74453b;
+
+    margin-bottom: 18px;
+
+    line-height: 1.5;
+
+}
+
+
+/* =========================================================
+   CAMPOS
+   ========================================================= */
+
+.campo {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 8px;
+
+}
+
+
+.campo label {
+
+    font-weight: 700;
+
+    color: #7f2b1d;
+
+}
+
+
+.campo input {
+
+    width: 100%;
+
+    height: 48px;
+
+    border:
+        2px solid #d58b7c;
+
+    border-radius: 8px;
+
+    padding:
+        0 14px;
+
+    font-size: 17px;
+
+    outline: none;
+
+}
+
+
+.campo input:focus {
+
+    border-color: #a92d1c;
+
+    box-shadow:
+        0 0 0 3px
+        rgba(169, 45, 28, 0.12);
+
+}
+
+
+/* =========================================================
+   TABLA DE ENTRADA
+   ========================================================= */
+
+.tabla-scroll {
+
+    width: 100%;
+
+    overflow-x: auto;
+
+}
+
+
+.tabla-entrada {
+
+    width: 100%;
+
+    min-width: 950px;
+
+    border-collapse: collapse;
+
+}
+
+
+.tabla-entrada th {
+
+    background: #a93c26;
+
+    color: #ffffff;
+
+    padding: 13px 10px;
+
+    font-size: 15px;
+
+    text-align: center;
+
+}
+
+
+.tabla-entrada td {
+
+    border:
+        1px solid #e0bbb2;
+
+    padding: 7px;
+
+    background: #fffaf8;
+
+}
+
+
+.tabla-entrada tr:nth-child(even) td {
+
+    background: #fdf0ec;
+
+}
+
+
+/* =========================================================
+   INPUTS DE LA TABLA
+   ========================================================= */
+
+.tabla-entrada input {
+
+    width: 100%;
+
+    min-width: 100px;
+
+    height: 38px;
+
+    border:
+        1px solid #d6a49a;
+
+    border-radius: 5px;
+
+    padding:
+        5px 8px;
+
+    font-size: 14px;
+
+    color: #63271c;
+
+    background: #ffffff;
+
+    outline: none;
+
+}
+
+
+.tabla-entrada input:focus {
+
+    border-color: #a93c26;
+
+}
+
+
+/* =========================================================
+   CELDA DEL DÍA
+   ========================================================= */
+
+.celda-dia {
+
+    text-align: center;
+
+    font-weight: 800;
+
+    color: #8f2d1d;
+
+    white-space: nowrap;
+
+}
+
+
+/* =========================================================
+   CELDA DE CLASE
+   ========================================================= */
+
+.celda-clase {
+
+    text-align: center;
+
+    font-weight: 700;
+
+    color: #8f2d1d;
+
+    white-space: nowrap;
+
+}
+
+
+/* =========================================================
+   BOTONES
+   ========================================================= */
+
+.acciones {
+
+    display: flex;
+
+    justify-content: center;
+
+    align-items: center;
+
+    flex-wrap: wrap;
+
+    gap: 12px;
+
+    margin:
+        25px auto;
+
+}
+
+
+.boton {
+
+    min-width: 210px;
+
+    min-height: 52px;
+
+    border-radius: 9px;
+
+    padding:
+        10px 22px;
+
+    font-size: 16px;
+
+    font-weight: 800;
+
+    cursor: pointer;
+
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease,
+        background 0.2s ease;
+
+}
+
+
+.boton:hover {
+
+    transform:
+        translateY(-2px);
+
+}
+
+
+.boton:active {
+
+    transform:
+        translateY(0);
+
+}
+
+
+/* =========================================================
+   GENERAR
+   ========================================================= */
+
+.boton-generar {
+
+    background:
+        #cf3925;
+
+    color:
+        #ffffff;
+
+    border:
+        2px solid #a92b1b;
+
+    box-shadow:
+        0 4px 0 #8c2115;
+
+}
+
+
+/* =========================================================
+   GUARDAR
+   ========================================================= */
+
+.boton-guardar {
+
+    background:
+        #ffffff;
+
+    color:
+        #8f2d1d;
+
+    border:
+        2px solid #b63c26;
+
+}
+
+
+/* =========================================================
+   PDF
+   ========================================================= */
+
+.boton-pdf {
+
+    background:
+        #8f2d1d;
+
+    color:
+        #ffffff;
+
+    border:
+        2px solid #702216;
+
+    box-shadow:
+        0 4px 0 #621c12;
+
+}
+
+
+/* =========================================================
+   LIMPIAR
+   ========================================================= */
+
+.boton-limpiar {
+
+    background:
+        #f4e8e4;
+
+    color:
+        #8f2d1d;
+
+    border:
+        2px solid #cba095;
+
+}
+
+
+/* =========================================================
+   MENSAJES
+   ========================================================= */
+
+.mensaje {
+
+    width: 100%;
+
+    text-align: center;
+
+    min-height: 25px;
+
+    margin:
+        10px 0 20px;
+
+    font-weight: 700;
+
+}
+
+
+.mensaje.exito {
+
+    color:
+        #27853b;
+
+}
+
+
+.mensaje.error {
+
+    color:
+        #b42318;
+
+}
+
+
+/* =========================================================
+   VISTA PREVIA
+   ========================================================= */
+
+.vista-previa {
+
+    margin-top: 30px;
+
+}
+
+
+.titulo-preview {
+
+    text-align: center;
+
+    margin-bottom: 20px;
+
+}
+
+
+.titulo-preview h2 {
+
+    display: inline-block;
+
+    background:
+        #eadbd5;
+
+    color:
+        #5d2c22;
+
+    padding:
+        8px 35px;
+
+    border-radius:
+        20px;
+
+    font-size:
+        clamp(24px, 4vw, 36px);
+
+    margin-bottom: 8px;
+
+}
+
+
+.titulo-preview p {
+
+    color:
+        #8f2d1d;
+
+    font-size: 20px;
+
+    font-weight: 700;
+
+}
+
+
+/* =========================================================
+   TABLA DEL HORARIO
+   ========================================================= */
+
+.tabla-horario {
+
+    width: 100%;
+
+    min-width: 850px;
+
+    border-collapse: separate;
+
+    border-spacing: 0;
+
+    overflow: hidden;
+
+    border:
+        1px solid #d8b3aa;
+
+}
+
+
+/* =========================================================
+   ENCABEZADO TABLA
+   ========================================================= */
+
+.tabla-horario thead th {
+
+    background:
+        #a7442c;
+
+    color:
+        #ffffff;
+
+    font-size:
+        16px;
+
+    font-weight:
+        800;
+
+    padding:
+        14px 8px;
+
+    border-right:
+        1px solid
+        rgba(255,255,255,0.35);
+
+    text-align:
+        center;
+
+}
+
+
+.tabla-horario thead th:first-child {
+
+    border-radius:
+        8px 0 0 0;
+
+}
+
+
+.tabla-horario thead th:last-child {
+
+    border-radius:
+        0 8px 0 0;
+
+}
+
+
+/* =========================================================
+   CELDAS
+   ========================================================= */
+
+.tabla-horario td {
+
+    height: 72px;
+
+    padding:
+        8px;
+
+    text-align:
+        center;
+
+    vertical-align:
+        middle;
+
+    border-right:
+        1px solid #dfc2bb;
+
+    border-bottom:
+        1px solid #dfc2bb;
+
+    background:
+        #ffffff;
+
+    color:
+        #6e3024;
+
+    font-size:
+        14px;
+
+}
+
+
+.tabla-horario td.hora {
+
+    width:
+        140px;
+
+    background:
+        #f2dfd9;
+
+    color:
+        #7f2b1d;
+
+    font-weight:
+        800;
+
+}
+
+
+/* =========================================================
+   INFORMACIÓN DENTRO DE LAS CELDAS
+   ========================================================= */
+
+.materia {
+
+    display:
+        block;
+
+    font-size:
+        15px;
+
+    font-weight:
+        800;
+
+    color:
+        #7f2b1d;
+
+    margin-bottom:
+        5px;
+
+}
+
+
+.docente {
+
+    display:
+        block;
+
+    font-size:
+        12px;
+
+    color:
+        #87584d;
+
+}
+
+
+/* =========================================================
+   CELDA VACÍA
+   ========================================================= */
+
+.celda-vacia {
+
+    color:
+        #c5a59d;
+
+    font-style:
+        italic;
+
+}
+
+
+/* =========================================================
+   COLORES DE LAS MATERIAS
+   ========================================================= */
+
+.color-1 {
+
+    background:
+        #f8dfd8 !important;
+
+}
+
+
+.color-2 {
+
+    background:
+        #f5e5d2 !important;
+
+}
+
+
+.color-3 {
+
+    background:
+        #eadfd2 !important;
+
+}
+
+
+.color-4 {
+
+    background:
+        #f1d7d2 !important;
+
+}
+
+
+.color-5 {
+
+    background:
+        #f7e8df !important;
+
+}
+
+
+.color-6 {
+
+    background:
+        #ead7d1 !important;
+
+}
+
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 700px) {
+
+    .encabezado {
+
+        padding:
+            28px 15px 38px;
+
+    }
+
+
+    .encabezado h1 {
+
+        font-size:
+            34px;
+
+    }
+
+
+    .contenedor {
+
+        width:
+            96%;
+
+        margin-top:
+            20px;
+
+    }
+
+
+    .tarjeta {
+
+        padding:
+            17px;
+
+        border-radius:
+            12px;
+
+    }
+
+
+    .tarjeta h2 {
+
+        font-size:
+            22px;
+
+    }
+
+
+    .acciones {
+
+        flex-direction:
+            column;
+
+    }
+
+
+    .boton {
+
+        width:
+            100%;
+
+        max-width:
+            420px;
+
+    }
+
+
+    .titulo-preview h2 {
+
+        font-size:
+            26px;
+
+        padding:
+            7px 25px;
+
+    }
+
+
+    .titulo-preview p {
+
+        font-size:
+            17px;
+
+    }
+
+}
+
+
+/* =========================================================
+   IMPRESIÓN
+   ========================================================= */
+
+@media print {
+
+    body {
+
+        background:
+            #ffffff;
+
+    }
+
+
+    .encabezado,
+    .tarjeta:not(.vista-previa),
+    .acciones,
+    .mensaje {
+
+        display:
+            none !important;
+
+    }
+
+
+    .contenedor {
+
+        width:
+            100%;
+
+        margin:
+            0;
+
+    }
+
+
+    .vista-previa {
+
+        display:
+            block !important;
+
+        border:
+            none;
+
+        box-shadow:
+            none;
+
+        margin:
+            0;
+
+    }
+
+
+    .tabla-horario {
+
+        min-width:
+            100%;
+
+    }
+
+}
