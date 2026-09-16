@@ -1,5 +1,6 @@
 /* =========================================================
    GESTOR DE HORARIOS
+   VER HORARIOS
    JAVASCRIPT PRINCIPAL
    ========================================================= */
 
@@ -9,6 +10,7 @@
    ========================================================= */
 
 const NUM_DIAS = 5;
+
 const NUM_CLASES = 6;
 
 
@@ -16,125 +18,609 @@ const NUM_CLASES = 6;
    ELEMENTOS DEL HTML
    ========================================================= */
 
-const nombreHorario = document.getElementById("nombreHorario");
-const formularioClases = document.getElementById("formularioClases");
-const cuerpoHorario = document.getElementById("cuerpoHorario");
-const nombrePreview = document.getElementById("nombrePreview");
-const mensaje = document.getElementById("mensaje");
+const listaHorarios =
+    document.getElementById("listaHorarios");
 
-const btnGenerar = document.getElementById("btnGenerar");
-const btnGuardar = document.getElementById("btnGuardar");
-const btnPDF = document.getElementById("btnPDF");
-const btnLimpiar = document.getElementById("btnLimpiar");
+
+const buscarHorario =
+    document.getElementById("buscarHorario");
+
+
+const totalHorarios =
+    document.getElementById("totalHorarios");
+
+
+const previewHorario =
+    document.getElementById("previewHorario");
+
+
+const btnPDF =
+    document.getElementById("btnPDF");
+
+
+const btnVolver =
+    document.getElementById("btnVolver");
 
 
 /* =========================================================
-   DATOS DEL HORARIO
+   VARIABLE DEL HORARIO SELECCIONADO
    ========================================================= */
 
-let horarioActual = null;
+let horarios = [];
+
+let horarioSeleccionado = null;
 
 
 /* =========================================================
-   CREAR LOS CAMPOS DE ENTRADA
+   CARGAR HORARIOS
    ========================================================= */
 
-function crearFormulario() {
-    formularioClases.innerHTML = "";
+function cargarHorarios() {
 
-    for (let dia = 1; dia <= NUM_DIAS; dia++) {
-        for (let clase = 1; clase <= NUM_CLASES; clase++) {
-            const fila = document.createElement("tr");
+    try {
 
-            fila.innerHTML = `
-                <td class="celda-dia">
-                    Día ${dia}
-                </td>
-                <td class="celda-clase">
-                    Clase ${clase}
-                </td>
-                <td>
-                    <input
-                        type="time"
-                        class="hora-inicio"
-                        data-dia="${dia}"
-                        data-clase="${clase}"
-                    >
-                </td>
-                <td>
-                    <input
-                        type="time"
-                        class="hora-final"
-                        data-dia="${dia}"
-                        data-clase="${clase}"
-                    >
-                </td>
-                <td>
-                    <input
-                        type="text"
-                        class="asignatura"
-                        data-dia="${dia}"
-                        data-clase="${clase}"
-                        placeholder="Asignatura"
-                    >
-                </td>
-                <td>
-                    <input
-                        type="text"
-                        class="docente"
-                        data-dia="${dia}"
-                        data-clase="${clase}"
-                        placeholder="Docente"
-                    >
-                </td>
-            `;
+        horarios =
+            JSON.parse(
+                localStorage.getItem("horarios")
+            ) || [];
 
-            formularioClases.appendChild(fila);
-        }
     }
+
+    catch (error) {
+
+        horarios = [];
+
+        console.error(
+            "Error al cargar los horarios:",
+            error
+        );
+
+    }
+
+
+    mostrarListaHorarios(
+        horarios
+    );
+
+
+    actualizarTotal();
+
+
+    /*
+       Si existen horarios,
+       seleccionamos automáticamente
+       el primero.
+    */
+
+    if (
+        horarios.length > 0
+    ) {
+
+        seleccionarHorario(
+            horarios[0].id
+        );
+
+    }
+
 }
 
 
 /* =========================================================
-   OBTENER DATOS DEL FORMULARIO
+   MOSTRAR LISTA
    ========================================================= */
 
-function obtenerDatos() {
-    const datos = [];
+function mostrarListaHorarios(
+    lista
+) {
 
-    for (let dia = 1; dia <= NUM_DIAS; dia++) {
-        const clases = [];
+    listaHorarios.innerHTML = "";
 
-        for (let clase = 1; clase <= NUM_CLASES; clase++) {
-            const inicio = document.querySelector(
-                `.hora-inicio[data-dia="${dia}"][data-clase="${clase}"]`
-            );
-            const final = document.querySelector(
-                `.hora-final[data-dia="${dia}"][data-clase="${clase}"]`
-            );
-            const asignatura = document.querySelector(
-                `.asignatura[data-dia="${dia}"][data-clase="${clase}"]`
-            );
-            const docente = document.querySelector(
-                `.docente[data-dia="${dia}"][data-clase="${clase}"]`
-            );
 
-            clases.push({
-                clase: clase,
-                inicio: inicio.value,
-                final: final.value,
-                asignatura: asignatura.value.trim(),
-                docente: docente.value.trim()
-            });
-        }
+    if (
+        lista.length === 0
+    ) {
 
-        datos.push({
-            dia: dia,
-            clases: clases
-        });
+        listaHorarios.innerHTML = `
+
+            <div class="sin-resultados">
+
+                <div style="font-size: 40px;">
+                    📅
+                </div>
+
+                <p>
+                    No hay horarios guardados.
+                </p>
+
+            </div>
+
+        `;
+
+        return;
+
     }
 
-    return datos;
+
+    lista.forEach(
+        horario => {
+
+            const item =
+                document.createElement("div");
+
+
+            item.className =
+                "item-horario";
+
+
+            item.dataset.id =
+                horario.id;
+
+
+            item.innerHTML = `
+
+                <div class="icono-horario">
+                    📅
+                </div>
+
+
+                <div class="info-horario">
+
+                    <h3>
+                        ${escaparHTML(
+                            horario.nombre ||
+                            "Horario sin nombre"
+                        )}
+                    </h3>
+
+                    <p>
+                        ${escaparHTML(
+                            horario.fecha ||
+                            "Sin fecha"
+                        )}
+                    </p>
+
+                </div>
+
+
+                <div class="botones-item">
+
+
+                    <button
+                        type="button"
+                        class="boton-item boton-ver"
+                        title="Ver horario"
+                        data-accion="ver"
+                        data-id="${horario.id}"
+                    >
+                        👁️
+                    </button>
+
+
+                    <button
+                        type="button"
+                        class="boton-item boton-descargar"
+                        title="Descargar PDF"
+                        data-accion="pdf"
+                        data-id="${horario.id}"
+                    >
+                        ↓
+                    </button>
+
+
+                    <button
+                        type="button"
+                        class="boton-item boton-eliminar"
+                        title="Eliminar horario"
+                        data-accion="eliminar"
+                        data-id="${horario.id}"
+                    >
+                        🗑️
+                    </button>
+
+
+                </div>
+
+            `;
+
+
+            listaHorarios.appendChild(
+                item
+            );
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   ACTUALIZAR TOTAL
+   ========================================================= */
+
+function actualizarTotal() {
+
+    totalHorarios.textContent =
+        `Total de horarios: ${horarios.length}`;
+
+}
+
+
+/* =========================================================
+   SELECCIONAR HORARIO
+   ========================================================= */
+
+function seleccionarHorario(
+    id
+) {
+
+    const horario =
+        horarios.find(
+            item =>
+                Number(item.id) === Number(id)
+        );
+
+
+    if (!horario) {
+
+        return;
+
+    }
+
+
+    horarioSeleccionado =
+        horario;
+
+
+    /*
+       Quitar selección anterior.
+    */
+
+    const items =
+        document.querySelectorAll(
+            ".item-horario"
+        );
+
+
+    items.forEach(
+        item => {
+
+            item.classList.remove(
+                "seleccionado"
+            );
+
+        }
+    );
+
+
+    /*
+       Marcar el seleccionado.
+    */
+
+    const seleccionado =
+        document.querySelector(
+            `.item-horario[data-id="${id}"]`
+        );
+
+
+    if (seleccionado) {
+
+        seleccionado.classList.add(
+            "seleccionado"
+        );
+
+    }
+
+
+    /*
+       Mostrar el horario.
+    */
+
+    generarVistaPrevia(
+        horario
+    );
+
+}
+
+
+/* =========================================================
+   GENERAR VISTA PREVIA
+   ========================================================= */
+
+function generarVistaPrevia(
+    horario
+) {
+
+    previewHorario.innerHTML = "";
+
+
+    /* =====================================================
+       INFORMACIÓN DEL HORARIO
+       ===================================================== */
+
+    const informacion =
+        document.createElement("div");
+
+
+    informacion.className =
+        "informacion-preview";
+
+
+    informacion.innerHTML = `
+
+        <h3>
+            ${escaparHTML(
+                horario.nombre ||
+                "Horario"
+            )}
+        </h3>
+
+        <p>
+            Creado el
+            ${escaparHTML(
+                horario.fecha ||
+                "Sin fecha"
+            )}
+        </p>
+
+    `;
+
+
+    previewHorario.appendChild(
+        informacion
+    );
+
+
+    /* =====================================================
+       DÍAS
+       ===================================================== */
+
+    for (
+        let dia = 0;
+        dia < NUM_DIAS;
+        dia++
+    ) {
+
+
+        const bloque =
+            document.createElement("div");
+
+
+        bloque.className =
+            "bloque-dia";
+
+
+        /* =================================================
+           ENCABEZADO DEL DÍA
+           ================================================= */
+
+        const encabezado =
+            document.createElement("div");
+
+
+        encabezado.className =
+            "encabezado-dia";
+
+
+        encabezado.textContent =
+            `DÍA ${dia + 1}`;
+
+
+        bloque.appendChild(
+            encabezado
+        );
+
+
+        /* =================================================
+           TABLA
+           ================================================= */
+
+        const tabla =
+            document.createElement("table");
+
+
+        tabla.className =
+            "tabla-dia";
+
+
+        tabla.innerHTML = `
+
+            <thead>
+
+                <tr>
+
+                    <th>
+                        Hora
+                    </th>
+
+                    <th>
+                        Clase
+                    </th>
+
+                    <th>
+                        Asignatura
+                    </th>
+
+                    <th>
+                        Docente
+                    </th>
+
+                </tr>
+
+            </thead>
+
+            <tbody></tbody>
+
+        `;
+
+
+        const cuerpo =
+            tabla.querySelector(
+                "tbody"
+            );
+
+
+        /* =================================================
+           CLASES
+           ================================================= */
+
+        let clasesDia = [];
+
+
+        if (
+            horario.dias &&
+            horario.dias[dia] &&
+            Array.isArray(
+                horario.dias[dia].clases
+            )
+        ) {
+
+            clasesDia =
+                horario.dias[dia].clases;
+
+        }
+
+
+        for (
+            let clase = 0;
+            clase < NUM_CLASES;
+            clase++
+        ) {
+
+
+            const datos =
+                clasesDia[clase] || {
+
+                    clase:
+                        clase + 1,
+
+                    inicio:
+                        "",
+
+                    final:
+                        "",
+
+                    asignatura:
+                        "",
+
+                    docente:
+                        ""
+
+                };
+
+
+            const fila =
+                document.createElement("tr");
+
+
+            /* =================================================
+               HORA
+               ================================================= */
+
+            const celdaHora =
+                document.createElement("td");
+
+
+            celdaHora.className =
+                "celda-hora";
+
+
+            celdaHora.textContent =
+                textoHora(
+                    datos
+                );
+
+
+            /* =================================================
+               CLASE
+               ================================================= */
+
+            const celdaClase =
+                document.createElement("td");
+
+
+            celdaClase.textContent =
+                `Clase ${
+                    datos.clase ||
+                    clase + 1
+                }`;
+
+
+            /* =================================================
+               ASIGNATURA
+               ================================================= */
+
+            const celdaAsignatura =
+                document.createElement("td");
+
+
+            celdaAsignatura.className =
+                "celda-asignatura";
+
+
+            celdaAsignatura.textContent =
+                datos.asignatura ||
+                "—";
+
+
+            /* =================================================
+               DOCENTE
+               ================================================= */
+
+            const celdaDocente =
+                document.createElement("td");
+
+
+            celdaDocente.className =
+                "celda-docente";
+
+
+            celdaDocente.textContent =
+                datos.docente ||
+                "—";
+
+
+            /* =================================================
+               AGREGAR
+               ================================================= */
+
+            fila.appendChild(
+                celdaHora
+            );
+
+
+            fila.appendChild(
+                celdaClase
+            );
+
+
+            fila.appendChild(
+                celdaAsignatura
+            );
+
+
+            fila.appendChild(
+                celdaDocente
+            );
+
+
+            cuerpo.appendChild(
+                fila
+            );
+
+        }
+
+
+        bloque.appendChild(
+            tabla
+        );
+
+
+        previewHorario.appendChild(
+            bloque
+        );
+
+    }
+
 }
 
 
@@ -142,238 +628,217 @@ function obtenerDatos() {
    FORMATEAR HORA
    ========================================================= */
 
-function formatearHora(hora) {
+function formatearHora(
+    hora
+) {
+
     if (!hora) {
+
         return "";
+
     }
 
-    const partes = hora.split(":");
-    let horas = parseInt(partes[0], 10);
-    const minutos = partes[1];
-    const periodo = horas >= 12 ? "PM" : "AM";
 
-    if (horas === 0) {
+    const partes =
+        hora.split(":");
+
+
+    let horas =
+        parseInt(
+            partes[0],
+            10
+        );
+
+
+    const minutos =
+        partes[1] ||
+        "00";
+
+
+    const periodo =
+        horas >= 12
+            ? "PM"
+            : "AM";
+
+
+    if (
+        horas === 0
+    ) {
+
         horas = 12;
-    } else if (horas > 12) {
-        horas -= 12;
+
     }
+
+    else if (
+        horas > 12
+    ) {
+
+        horas -= 12;
+
+    }
+
 
     return `${horas}:${minutos} ${periodo}`;
+
 }
 
 
 /* =========================================================
-   CREAR TEXTO DE HORA
+   TEXTO DE HORA
    ========================================================= */
 
-function textoHora(clase) {
-    if (!clase.inicio && !clase.final) {
+function textoHora(
+    clase
+) {
+
+    if (
+        !clase.inicio &&
+        !clase.final
+    ) {
+
         return "Sin hora";
+
     }
 
-    if (clase.inicio && clase.final) {
-        return `${formatearHora(clase.inicio)} - ${formatearHora(clase.final)}`;
+
+    if (
+        clase.inicio &&
+        clase.final
+    ) {
+
+        return `${formatearHora(
+            clase.inicio
+        )} - ${formatearHora(
+            clase.final
+        )}`;
+
     }
 
-    if (clase.inicio) {
-        return formatearHora(clase.inicio);
-    }
 
-    return formatearHora(clase.final);
-}
+    if (
+        clase.inicio
+    ) {
 
-
-/* =========================================================
-   CREAR LA VISTA PREVIA / CREAR HORARIO
-   ========================================================= */
-
-function generarHorario() {
-    const nombre = nombreHorario.value.trim();
-
-    if (!nombre) {
-        mostrarMensaje(
-            "Escribe un nombre para el horario.",
-            "error"
+        return formatearHora(
+            clase.inicio
         );
-        nombreHorario.focus();
+
+    }
+
+
+    return formatearHora(
+        clase.final
+    );
+
+}
+
+
+/* =========================================================
+   ELIMINAR HORARIO
+   ========================================================= */
+
+function eliminarHorario(
+    id
+) {
+
+    const horario =
+        horarios.find(
+            item =>
+                Number(item.id) === Number(id)
+        );
+
+
+    if (!horario) {
+
         return;
+
     }
 
-    horarioActual = {
-        nombre: nombre,
-        dias: obtenerDatos(),
-        fecha: new Date().toLocaleString()
-    };
 
-    nombrePreview.textContent = nombre;
-    cuerpoHorario.innerHTML = "";
+    const confirmar =
+        confirm(
+            `¿Seguro que quieres eliminar el horario "${horario.nombre}"?`
+        );
 
-    /*
-       Cada fila representa una clase.
-       Las columnas representan:
-       Hora + Día 1 + Día 2 + Día 3 + Día 4 + Día 5
-    */
-
-    for (let claseNumero = 1; claseNumero <= NUM_CLASES; claseNumero++) {
-        const fila = document.createElement("tr");
-
-        /* ---------------------------------------------
-           COLUMNA DE HORAS
-           --------------------------------------------- */
-        const celdaHora = document.createElement("td");
-        celdaHora.className = "hora";
-
-        const claseDia1 = horarioActual.dias[0].clases[claseNumero - 1];
-        celdaHora.textContent = textoHora(claseDia1);
-
-        fila.appendChild(celdaHora);
-
-        /* ---------------------------------------------
-           DÍAS
-           --------------------------------------------- */
-        for (let dia = 0; dia < NUM_DIAS; dia++) {
-            const celda = document.createElement("td");
-            const datosClase = horarioActual.dias[dia].clases[claseNumero - 1];
-
-            if (datosClase.asignatura || datosClase.docente) {
-                celda.classList.add(`color-${(claseNumero % 6) + 1}`);
-
-                let contenido = "";
-
-                if (datosClase.asignatura) {
-                    contenido += `
-                        <span class="materia">
-                            ${escaparHTML(datosClase.asignatura)}
-                        </span>
-                    `;
-                }
-
-                if (datosClase.docente) {
-                    contenido += `
-                        <span class="docente">
-                            ${escaparHTML(datosClase.docente)}
-                        </span>
-                    `;
-                }
-
-                celda.innerHTML = contenido;
-            } else {
-                celda.innerHTML = `
-                    <span class="celda-vacia">
-                        —
-                    </span>
-                `;
-            }
-
-            fila.appendChild(celda);
-        }
-
-        cuerpoHorario.appendChild(fila);
-    }
-
-    mostrarMensaje(
-        "Horario generado correctamente.",
-        "exito"
-    );
-
-    document.getElementById("vistaPrevia").scrollIntoView({
-        behavior: "smooth",
-        block: "start"
-    });
-}
-
-
-/* =========================================================
-   ESCAPAR HTML
-   ========================================================= */
-
-function escaparHTML(texto) {
-    return texto
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
-}
-
-
-/* =========================================================
-   GUARDAR HORARIO
-   ========================================================= */
-
-function guardarHorario() {
-    if (!horarioActual) {
-        generarHorario();
-    }
-
-    if (!horarioActual) {
-        return;
-    }
-
-    let horarios = JSON.parse(localStorage.getItem("horarios")) || [];
-
-    const horarioGuardar = {
-        id: Date.now(),
-        nombre: horarioActual.nombre,
-        dias: horarioActual.dias,
-        fecha: new Date().toLocaleString()
-    };
-
-    horarios.push(horarioGuardar);
-
-    localStorage.setItem("horarios", JSON.stringify(horarios));
-
-    mostrarMensaje(
-        "Horario guardado correctamente.",
-        "exito"
-    );
-}
-
-
-/* =========================================================
-   LIMPIAR FORMULARIO
-   ========================================================= */
-
-function limpiarFormulario() {
-    const confirmar = confirm(
-        "¿Seguro que quieres limpiar todos los datos?"
-    );
 
     if (!confirmar) {
+
         return;
+
     }
 
-    nombreHorario.value = "";
 
-    const inputs = formularioClases.querySelectorAll("input");
+    horarios =
+        horarios.filter(
+            item =>
+                Number(item.id) !== Number(id)
+        );
 
-    inputs.forEach(input => {
-        input.value = "";
-    });
 
-    cuerpoHorario.innerHTML = "";
-    nombrePreview.textContent = "Sin nombre";
-    horarioActual = null;
-
-    mostrarMensaje(
-        "Formulario limpiado.",
-        "exito"
+    localStorage.setItem(
+        "horarios",
+        JSON.stringify(horarios)
     );
+
+
+    horarioSeleccionado =
+        null;
+
+
+    mostrarListaHorarios(
+        horarios
+    );
+
+
+    actualizarTotal();
+
+
+    if (
+        horarios.length > 0
+    ) {
+
+        seleccionarHorario(
+            horarios[0].id
+        );
+
+    }
+
+    else {
+
+        mostrarSinSeleccion();
+
+    }
+
 }
 
 
 /* =========================================================
-   MENSAJES
+   MOSTRAR SIN SELECCIÓN
    ========================================================= */
 
-function mostrarMensaje(texto, tipo) {
-    mensaje.textContent = texto;
-    mensaje.className = `mensaje ${tipo}`;
+function mostrarSinSeleccion() {
 
-    setTimeout(() => {
-        mensaje.textContent = "";
-        mensaje.className = "mensaje";
-    }, 4000);
+    previewHorario.innerHTML = `
+
+        <div class="sin-seleccion">
+
+            <div class="sin-seleccion-icono">
+                📅
+            </div>
+
+            <h3>
+                Selecciona un horario
+            </h3>
+
+            <p>
+                Selecciona uno de los horarios
+                de la lista para visualizarlo.
+            </p>
+
+        </div>
+
+    `;
+
 }
 
 
@@ -381,166 +846,689 @@ function mostrarMensaje(texto, tipo) {
    DESCARGAR PDF
    ========================================================= */
 
-function descargarPDF() {
-    if (!horarioActual) {
-        generarHorario();
-    }
+function descargarPDF(
+    horario
+) {
 
-    if (!horarioActual) {
-        return;
-    }
+    if (!horario) {
 
-    if (!window.jspdf || !window.jspdf.jsPDF) {
-        mostrarMensaje(
-            "No se pudo cargar el generador de PDF. Revisa tu conexión a Internet.",
-            "error"
+        alert(
+            "Primero selecciona un horario."
         );
+
         return;
+
     }
 
-    const { jsPDF } = window.jspdf;
 
-    const pdf = new jsPDF({
-        orientation: "landscape",
-        unit: "mm",
-        format: "a4"
-    });
+    if (
+        !window.jspdf ||
+        !window.jspdf.jsPDF
+    ) {
 
-    /* TÍTULO */
-    pdf.setFont("helvetica", "bold");
-    pdf.setFontSize(22);
-    pdf.setTextColor(127, 43, 29);
-    pdf.text("GESTOR DE HORARIOS", 148, 17, { align: "center" });
+        alert(
+            "No se pudo cargar el generador de PDF. Revisa tu conexión a Internet."
+        );
 
-    /* NOMBRE */
-    pdf.setFontSize(14);
-    pdf.setTextColor(100, 55, 45);
-    pdf.text(horarioActual.nombre, 148, 25, { align: "center" });
+        return;
 
-    /* ENCABEZADOS */
-    const encabezados = [
-        ["Horas", "Día 1", "Día 2", "Día 3", "Día 4", "Día 5"]
-    ];
-
-    /* FILAS PDF */
-    const filas = [];
-
-    for (let clase = 0; clase < NUM_CLASES; clase++) {
-        const fila = [];
-        const referencia = horarioActual.dias[0].clases[clase];
-
-        fila.push(textoHora(referencia));
-
-        for (let dia = 0; dia < NUM_DIAS; dia++) {
-            const datos = horarioActual.dias[dia].clases[clase];
-            let texto = "";
-
-            if (datos.asignatura) {
-                texto += datos.asignatura;
-            }
-
-            if (datos.docente) {
-                texto += "\n" + datos.docente;
-            }
-
-            if (!texto) {
-                texto = "—";
-            }
-
-            fila.push(texto);
-        }
-
-        filas.push(fila);
     }
 
-    /* CREAR TABLA */
-    pdf.autoTable({
-        head: encabezados,
-        body: filas,
-        startY: 32,
-        theme: "grid",
-        styles: {
-            font: "helvetica",
-            fontSize: 10,
-            textColor: [110, 55, 45],
-            halign: "center",
-            valign: "middle",
-            cellPadding: 5,
-            lineColor: [215, 180, 170],
-            lineWidth: 0.3
-        },
-        headStyles: {
-            fillColor: [167, 68, 44],
-            textColor: [255, 255, 255],
-            fontStyle: "bold",
-            halign: "center",
-            valign: "middle"
-        },
-        columnStyles: {
-            0: { fillColor: [242, 223, 217], fontStyle: "bold", cellWidth: 32 },
-            1: { cellWidth: 44 },
-            2: { cellWidth: 44 },
-            3: { cellWidth: 44 },
-            4: { cellWidth: 44 },
-            5: { cellWidth: 44 }
-        },
-        didParseCell: function(data) {
-            if (data.section === "body" && data.column.index > 0) {
-                const colores = [
-                    [248, 223, 216],
-                    [245, 229, 210],
-                    [234, 223, 210],
-                    [241, 215, 210],
-                    [247, 232, 223],
-                    [234, 215, 209]
-                ];
-                const indice = data.row.index % 6;
-                data.cell.styles.fillColor = colores[indice];
-            }
-        }
-    });
 
-    /* PIE DE PÁGINA */
-    const paginas = pdf.internal.getNumberOfPages();
+    const {
+        jsPDF
+    } = window.jspdf;
 
-    for (let pagina = 1; pagina <= paginas; pagina++) {
-        pdf.setPage(pagina);
-        pdf.setFontSize(8);
-        pdf.setTextColor(140, 100, 90);
-        pdf.text("Gestor de Horarios", 148, 202, { align: "center" });
-    }
 
-    /* DESCARGAR */
-    let nombreArchivo = horarioActual.nombre.replace(
-        /[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑ_-]/g,
-        "_"
+    const pdf =
+        new jsPDF({
+
+            orientation:
+                "landscape",
+
+            unit:
+                "mm",
+
+            format:
+                "a4"
+
+        });
+
+
+    /* =====================================================
+       TÍTULO
+       ===================================================== */
+
+    pdf.setFont(
+        "helvetica",
+        "bold"
     );
 
-    if (!nombreArchivo) {
-        nombreArchivo = "horario";
+
+    pdf.setFontSize(
+        22
+    );
+
+
+    pdf.setTextColor(
+        127,
+        43,
+        29
+    );
+
+
+    pdf.text(
+        "GESTOR DE HORARIOS",
+        148,
+        16,
+        {
+            align:
+                "center"
+        }
+    );
+
+
+    /* =====================================================
+       NOMBRE
+       ===================================================== */
+
+    pdf.setFontSize(
+        15
+    );
+
+
+    pdf.setTextColor(
+        90,
+        45,
+        35
+    );
+
+
+    pdf.text(
+        horario.nombre ||
+        "HORARIO",
+        148,
+        24,
+        {
+            align:
+                "center"
+        }
+    );
+
+
+    let posicionY =
+        31;
+
+
+    /* =====================================================
+       CREAR CADA DÍA
+       ===================================================== */
+
+    for (
+        let dia = 0;
+        dia < NUM_DIAS;
+        dia++
+    ) {
+
+
+        /*
+           Si no cabe otro día en la página,
+           creamos una nueva.
+        */
+
+        if (
+            posicionY > 175
+        ) {
+
+            pdf.addPage();
+
+            posicionY =
+                15;
+
+        }
+
+
+        /* =================================================
+           ENCABEZADO DEL DÍA
+           ================================================= */
+
+        pdf.setFillColor(
+            169,
+            43,
+            23
+        );
+
+
+        pdf.roundedRect(
+            14,
+            posicionY,
+            269,
+            8,
+            2,
+            2,
+            "F"
+        );
+
+
+        pdf.setTextColor(
+            255,
+            255,
+            255
+        );
+
+
+        pdf.setFontSize(
+            11
+        );
+
+
+        pdf.setFont(
+            "helvetica",
+            "bold"
+        );
+
+
+        pdf.text(
+            `DÍA ${dia + 1}`,
+            20,
+            posicionY + 5.5
+        );
+
+
+        posicionY +=
+            8;
+
+
+        /* =================================================
+           DATOS
+           ================================================= */
+
+        const filas =
+            [];
+
+
+        let clasesDia = [];
+
+
+        if (
+            horario.dias &&
+            horario.dias[dia] &&
+            Array.isArray(
+                horario.dias[dia].clases
+            )
+        ) {
+
+            clasesDia =
+                horario.dias[dia].clases;
+
+        }
+
+
+        for (
+            let clase = 0;
+            clase < NUM_CLASES;
+            clase++
+        ) {
+
+
+            const datos =
+                clasesDia[clase] || {};
+
+
+            let materia =
+                datos.asignatura ||
+                "—";
+
+
+            let docente =
+                datos.docente ||
+                "—";
+
+
+            filas.push([
+
+                textoHora(
+                    datos
+                ),
+
+                `Clase ${
+                    datos.clase ||
+                    clase + 1
+                }`,
+
+                materia,
+
+                docente
+
+            ]);
+
+        }
+
+
+        /* =================================================
+           TABLA PDF
+           ================================================= */
+
+        pdf.autoTable({
+
+            head: [[
+
+                "Hora",
+                "Clase",
+                "Asignatura",
+                "Docente"
+
+            ]],
+
+            body:
+                filas,
+
+            startY:
+                posicionY,
+
+            theme:
+                "grid",
+
+            margin: {
+
+                left:
+                    14,
+
+                right:
+                    14
+
+            },
+
+            styles: {
+
+                font:
+                    "helvetica",
+
+                fontSize:
+                    8.5,
+
+                textColor:
+                    [
+                        70,
+                        40,
+                        32
+                    ],
+
+                halign:
+                    "center",
+
+                valign:
+                    "middle",
+
+                cellPadding:
+                    3,
+
+                lineColor:
+                    [
+                        220,
+                        190,
+                        180
+                    ],
+
+                lineWidth:
+                    0.25
+
+            },
+
+            headStyles: {
+
+                fillColor:
+                    [
+                        247,
+                        227,
+                        222
+                    ],
+
+                textColor:
+                    [
+                        40,
+                        25,
+                        20
+                    ],
+
+                fontStyle:
+                    "bold"
+
+            },
+
+            columnStyles: {
+
+                0: {
+
+                    cellWidth:
+                        55,
+
+                    fillColor:
+                        [
+                            242,
+                            223,
+                            217
+                        ]
+
+                },
+
+                1: {
+
+                    cellWidth:
+                        35
+
+                },
+
+                2: {
+
+                    cellWidth:
+                        90
+
+                },
+
+                3: {
+
+                    cellWidth:
+                        89
+
+                }
+
+            }
+
+        });
+
+
+        posicionY =
+            pdf.lastAutoTable.finalY +
+            7;
+
     }
 
-    pdf.save(`${nombreArchivo}.pdf`);
 
-    mostrarMensaje(
-        "PDF descargado correctamente.",
-        "exito"
+    /* =====================================================
+       PIE DE PÁGINA
+       ===================================================== */
+
+    const paginas =
+        pdf.internal.getNumberOfPages();
+
+
+    for (
+        let pagina = 1;
+        pagina <= paginas;
+        pagina++
+    ) {
+
+        pdf.setPage(
+            pagina
+        );
+
+
+        pdf.setFont(
+            "helvetica",
+            "normal"
+        );
+
+
+        pdf.setFontSize(
+            8
+        );
+
+
+        pdf.setTextColor(
+            140,
+            100,
+            90
+        );
+
+
+        pdf.text(
+            "Gestor de Horarios - Institución Educativa Inocencio Chincá",
+            148,
+            202,
+            {
+                align:
+                    "center"
+            }
+        );
+
+    }
+
+
+    /* =====================================================
+       NOMBRE DEL ARCHIVO
+       ===================================================== */
+
+    let nombreArchivo =
+        (horario.nombre ||
+        "horario")
+            .replace(
+                /[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑ_-]/g,
+                "_"
+            );
+
+
+    if (
+        !nombreArchivo
+    ) {
+
+        nombreArchivo =
+            "horario";
+
+    }
+
+
+    pdf.save(
+        `${nombreArchivo}.pdf`
     );
+
 }
 
 
 /* =========================================================
-   BOTONES Y EVENTOS
+   ESCAPAR HTML
    ========================================================= */
 
-btnGenerar.addEventListener("click", generarHorario);
-btnGuardar.addEventListener("click", guardarHorario);
-btnPDF.addEventListener("click", descargarPDF);
-btnLimpiar.addEventListener("click", limpiarFormulario);
+function escaparHTML(
+    texto
+) {
+
+    return String(
+        texto || ""
+    )
+        .replace(
+            /&/g,
+            "&amp;"
+        )
+        .replace(
+            /</g,
+            "&lt;"
+        )
+        .replace(
+            />/g,
+            "&gt;"
+        )
+        .replace(
+            /"/g,
+            "&quot;"
+        )
+        .replace(
+            /'/g,
+            "&#039;"
+        );
+
+}
+
+
+/* =========================================================
+   BUSCADOR
+   ========================================================= */
+
+buscarHorario.addEventListener(
+    "input",
+    function () {
+
+        const texto =
+            this.value
+                .trim()
+                .toLowerCase();
+
+
+        const filtrados =
+            horarios.filter(
+                horario => {
+
+                    const nombre =
+                        String(
+                            horario.nombre ||
+                            ""
+                        )
+                            .toLowerCase();
+
+
+                    return nombre.includes(
+                        texto
+                    );
+
+                }
+            );
+
+
+        mostrarListaHorarios(
+            filtrados
+        );
+
+
+        /*
+           Si el horario seleccionado
+           no aparece en el filtro,
+           no hacemos nada con la vista.
+        */
+
+    }
+);
+
+
+/* =========================================================
+   EVENTOS DE LOS BOTONES DE LA LISTA
+   ========================================================= */
+
+listaHorarios.addEventListener(
+    "click",
+    function (evento) {
+
+        const boton =
+            evento.target.closest(
+                "[data-accion]"
+            );
+
+
+        if (!boton) {
+
+            return;
+
+        }
+
+
+        const accion =
+            boton.dataset.accion;
+
+
+        const id =
+            Number(
+                boton.dataset.id
+            );
+
+
+        if (
+            accion === "ver"
+        ) {
+
+            seleccionarHorario(
+                id
+            );
+
+        }
+
+
+        else if (
+            accion === "pdf"
+        ) {
+
+            const horario =
+                horarios.find(
+                    item =>
+                        Number(item.id) === id
+                );
+
+
+            descargarPDF(
+                horario
+            );
+
+        }
+
+
+        else if (
+            accion === "eliminar"
+        ) {
+
+            eliminarHorario(
+                id
+            );
+
+        }
+
+    }
+);
+
+
+/* =========================================================
+   BOTÓN PDF PRINCIPAL
+   ========================================================= */
+
+btnPDF.addEventListener(
+    "click",
+    function () {
+
+        if (
+            !horarioSeleccionado
+        ) {
+
+            alert(
+                "Primero selecciona un horario."
+            );
+
+            return;
+
+        }
+
+
+        descargarPDF(
+            horarioSeleccionado
+        );
+
+    }
+);
+
+
+/* =========================================================
+   VOLVER AL MENÚ
+   ========================================================= */
+
+btnVolver.addEventListener(
+    "click",
+    function () {
+
+        window.location.href =
+            "menu.html";
+
+    }
+);
 
 
 /* =========================================================
    INICIAR
    ========================================================= */
 
-crearFormulario();
+cargarHorarios();
