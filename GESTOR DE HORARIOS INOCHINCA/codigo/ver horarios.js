@@ -52,56 +52,87 @@ let horarioSeleccionado = null;
 
 
 /* =========================================================
-   CARGAR HORARIOS
+   CARGAR HORARIOS (SUPABASE + LOCALSTORAGE)
    ========================================================= */
 
-function cargarHorarios() {
+async function cargarHorarios() {
 
+    // Cargar inicialmente desde localStorage para respuesta instantánea
     try {
-
-        horarios =
-            JSON.parse(
-                localStorage.getItem("horarios")
-            ) || [];
-
-    }
-
-    catch (error) {
-
+        horarios = JSON.parse(localStorage.getItem("horarios")) || [];
+        horarios.forEach(h => {
+            if (!h.origen) h.origen = "local";
+        });
+    } catch (error) {
         horarios = [];
-
-        console.error(
-            "Error al cargar los horarios:",
-            error
-        );
-
+        console.error("Error al cargar los horarios de localStorage:", error);
     }
 
-
-    mostrarListaHorarios(
-        horarios
-    );
-
-
+    mostrarListaHorarios(horarios);
     actualizarTotal();
 
-
-    /*
-       Si existen horarios,
-       seleccionamos automáticamente
-       el primero.
-    */
-
-    if (
-        horarios.length > 0
-    ) {
-
-        seleccionarHorario(
-            horarios[0].id
-        );
-
+    if (horarios.length > 0 && !horarioSeleccionado) {
+        seleccionarHorario(horarios[0].id);
     }
 
+    // Comprobar estado de conexión con Supabase
+    actualizarEstadoSupabase();
+
+    // Obtener horarios desde Supabase
+    try {
+        const respuesta = await fetch("/api/horarios");
+        if (respuesta.ok) {
+            const data = await respuesta.json();
+            if (data.horarios && Array.isArray(data.horarios)) {
+                // Combinar horarios de Supabase y locales (evitando duplicados)
+                const supabaseHorarios = data.horarios.map(h => ({ ...h, origen: "supabase" }));
+                
+                const localesAlmacenados = JSON.parse(localStorage.getItem("horarios")) || [];
+                const soloLocales = localesAlmacenados.filter(
+                    localH => !supabaseHorarios.some(sh => String(sh.id) === String(localH.id) || (sh.nombre === localH.nombre && sh.fecha === localH.fecha))
+                ).map(h => ({ ...h, origen: "local" }));
+
+                horarios = [...supabaseHorarios, ...soloLocales];
+
+                mostrarListaHorarios(horarios);
+                actualizarTotal();
+
+                if (horarios.length > 0 && !horarioSeleccionado) {
+                    seleccionarHorario(horarios[0].id);
+                }
+            }
+        }
+    } catch (err) {
+        console.warn("No se pudo conectar con la API de Supabase:", err);
+    }
+
+}
+
+async function actualizarEstadoSupabase() {
+    const textoEl = document.getElementById("textoEstadoSupabase");
+    const contenedorEl = document.getElementById("estadoSupabase");
+    if (!textoEl || !contenedorEl) return;
+
+    try {
+        const res = await fetch("/api/status");
+        const data = await res.json();
+        if (data.connected) {
+            textoEl.textContent = "Base de datos Supabase: Conectado";
+            contenedorEl.style.color = "#27853b";
+            contenedorEl.style.backgroundColor = "#eef7ee";
+            contenedorEl.style.borderColor = "#c8e6c9";
+        } else {
+            textoEl.textContent = `Supabase: ${data.error || "Aviso de conexión"}`;
+            contenedorEl.style.color = "#c62828";
+            contenedorEl.style.backgroundColor = "#ffebee";
+            contenedorEl.style.borderColor = "#ffcdd2";
+        }
+    } catch (e) {
+        textoEl.textContent = "Supabase: Modo sin conexión (LocalStorage activo)";
+        contenedorEl.style.color = "#e65100";
+        contenedorEl.style.backgroundColor = "#fff3e0";
+        contenedorEl.style.borderColor = "#ffe0b2";
+    }
 }
 
 
@@ -156,6 +187,10 @@ function mostrarListaHorarios(
                 horario.id;
 
 
+            const badge = horario.origen === "supabase"
+                ? '<span style="display:inline-block; font-size:10px; font-weight:700; color:#1b5e20; background:#e8f5e9; padding:2px 6px; border-radius:4px; margin-left:6px; vertical-align:middle;">☁️ Supabase</span>'
+                : '<span style="display:inline-block; font-size:10px; font-weight:700; color:#e65100; background:#fff3e0; padding:2px 6px; border-radius:4px; margin-left:6px; vertical-align:middle;">💾 Local</span>';
+
             item.innerHTML = `
 
                 <div class="icono-horario">
@@ -170,6 +205,7 @@ function mostrarListaHorarios(
                             horario.nombre ||
                             "Horario sin nombre"
                         )}
+                        ${badge}
                     </h3>
 
                     <p>
@@ -737,14 +773,14 @@ function textoHora(
    ELIMINAR HORARIO
    ========================================================= */
 
-function eliminarHorario(
+async function eliminarHorario(
     id
 ) {
 
     const horario =
         horarios.find(
             item =>
-                Number(item.id) === Number(id)
+                String(item.id) === String(id)
         );
 
 
@@ -767,17 +803,30 @@ function eliminarHorario(
 
     }
 
+    if (horario.origen === "supabase") {
+        try {
+            await fetch(`/api/horarios/${id}`, { method: "DELETE" });
+        } catch (err) {
+            console.warn("Error al intentar eliminar de Supabase:", err);
+        }
+    }
 
     horarios =
         horarios.filter(
             item =>
-                Number(item.id) !== Number(id)
+                String(item.id) !== String(id)
         );
 
 
+    // Mantener localStorage actualizado
+    const localHorarios =
+        (JSON.parse(localStorage.getItem("horarios")) || []).filter(
+            item => String(item.id) !== String(id)
+        );
+
     localStorage.setItem(
         "horarios",
-        JSON.stringify(horarios)
+        JSON.stringify(localHorarios)
     );
 
 

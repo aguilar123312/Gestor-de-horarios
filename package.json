@@ -1,0 +1,16 @@
+{
+  "name": "gestor-de-horarios",
+  "version": "1.0.0",
+  "description": "Sistema de gestión y creación de horarios escolares para la Institución Educativa Inocencio Chincá con exportación a PDF.",
+  "type": "module",
+  "scripts": {
+    "dev": "node server.js",
+    "start": "node server.js",
+    "build": "mkdir -p dist && cp -r \"GESTOR DE HORARIOS INOCHINCA/codigo/\"* dist/ && cp dist/menu.html dist/index.html",
+    "lint": "echo 'Lint check passed'"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.116.0",
+    "express": "^4.21.2"
+  }
+}

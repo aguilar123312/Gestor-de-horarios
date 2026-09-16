@@ -544,67 +544,75 @@ function escaparHTML(texto) {
 
 
 /* =========================================================
-   GUARDAR HORARIO
+   GUARDAR HORARIO (SUPABASE + LOCALSTORAGE)
    ========================================================= */
 
-function guardarHorario() {
+async function guardarHorario() {
 
     if (!horarioActual) {
-
         generarHorario();
-
     }
-
 
     if (!horarioActual) {
-
         return;
-
     }
 
+    const horarioGuardar = {
+        id: Date.now(),
+        nombre: horarioActual.nombre,
+        dias: horarioActual.dias,
+        fecha: new Date().toLocaleString()
+    };
 
+    // Guardado local de respaldo inmediato
     let horarios =
         JSON.parse(
             localStorage.getItem("horarios")
         ) || [];
 
-
-    /*
-       Le damos un identificador único.
-    */
-
-    const horarioGuardar = {
-
-        id:
-            Date.now(),
-
-        nombre:
-            horarioActual.nombre,
-
-        dias:
-            horarioActual.dias,
-
-        fecha:
-            new Date().toLocaleString()
-
-    };
-
-
-    horarios.push(
-        horarioGuardar
-    );
-
+    horarios.push(horarioGuardar);
 
     localStorage.setItem(
         "horarios",
         JSON.stringify(horarios)
     );
 
+    mostrarMensaje("Guardando en la base de datos Supabase...", "info");
 
-    mostrarMensaje(
-        "Horario guardado correctamente.",
-        "exito"
-    );
+    try {
+        const respuesta = await fetch("/api/horarios", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(horarioGuardar)
+        });
+
+        const data = await respuesta.json();
+
+        if (respuesta.ok && data.success) {
+            mostrarMensaje(
+                "✓ Horario guardado con éxito en Supabase y localmente.",
+                "exito"
+            );
+        } else if (data.isRlsError) {
+            mostrarMensaje(
+                "✓ Horario guardado localmente. (Aviso: Supabase RLS bloqueó la inserción. Activa una política RLS en Supabase para sincronizar en la nube).",
+                "exito"
+            );
+        } else {
+            mostrarMensaje(
+                `✓ Guardado localmente. (${data.error || "Servidor no disponible"})`,
+                "exito"
+            );
+        }
+    } catch (error) {
+        console.warn("Fallo de red al conectar con Supabase:", error);
+        mostrarMensaje(
+            "✓ Horario guardado localmente en tu navegador.",
+            "exito"
+        );
+    }
 
 }
 
@@ -1247,3 +1255,22 @@ btnLimpiar.addEventListener(
    ========================================================= */
 
 crearFormulario();
+
+async function verificarEstadoSupabase() {
+    const badgeText = document.getElementById("textoEstadoSupabaseBadge");
+    if (!badgeText) return;
+    try {
+        const res = await fetch("/api/status");
+        const data = await res.json();
+        if (data.connected) {
+            badgeText.textContent = "Base de datos Supabase conectada";
+        } else {
+            badgeText.textContent = "Supabase: Modo sin conexión (LocalStorage activo)";
+        }
+    } catch (e) {
+        badgeText.textContent = "Supabase: Modo sin conexión (LocalStorage activo)";
+    }
+}
+
+verificarEstadoSupabase();
+
